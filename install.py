@@ -120,5 +120,3 @@ os.system("cp ./.zshrc ~/.zshrc")
 
 # NERD FONTS
 os.system(r"git clone https://github.com/ryanoasis/nerd-fonts.git && cd ./nerd-fonts && ./install.sh")
-
-os.system("source ~/.zshrc && pyenv install 3.8.0 & && pyenv install 3.9.6 &")
