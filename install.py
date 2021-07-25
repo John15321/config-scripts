@@ -24,6 +24,27 @@ args = parser.parse_args()
 print(args)
 
 
+# With GUI
+list_of_programs_with_gui_apt = [
+    "sudo apt install kate -y",
+    "sudo apt install tilix -y",
+]
+
+list_of_programs_with_gui_snap = [
+    "sudo snap install code --classic",
+]
+
+# Without GUI
+list_of_programs_without_gui_apt = [
+    "sudo apt install neovim -y && curl -sLf https://spacevim.org/install.sh | bash",
+]
+
+list_of_programs_without_gui_cargo = [
+    "cargo install exa",
+    "cargo install bat",
+    "cargo install lsd",
+]
+
 if args.distro == "Debian" or args.distro == "Rasp":
     os.system("sudo apt update && sudo apt upgrade -y")
     os.system("sudo apt install build-essential git -y")
@@ -69,35 +90,14 @@ if args.distro == "Debian" or args.distro == "Rasp":
 
 
 os.system(r"curl https://sh.rustup.rs -sSf | sh -s -- -y")
-# one of them should work
-os.system(r". $HOME/.cargo/env")
+## one of them should work
+#os.system(r". $HOME/.cargo/env")
 # Install useful programs
-
-# With GUI
-list_of_programs_with_gui_apt = [
-    "sudo apt install kate -y",
-    "sudo apt install tilix -y",
-]
-
-list_of_programs_with_gui_snap = [
-    "sudo snap install code --classic",
-]
-
-# Without GUI
-list_of_programs_without_gui_apt = [
-    "sudo apt install neovim -y && curl -sLf https://spacevim.org/install.sh | bash",
-]
-
-list_of_programs_without_gui_cargo = [
-    "cargo install exa",
-    "cargo install bat",
-    "cargo install lsd",
-]
 
 # Distro neutral
 
 for each in list_of_programs_without_gui_cargo:
-    os.system(each)
+    os.system(r". $HOME/.cargo/env" + each)
 
 if args.UI == "GUI":
     for each in list_of_programs_with_gui_snap:
@@ -121,4 +121,4 @@ os.system("cp ./.zshrc ~/.zshrc")
 # NERD FONTS
 os.system(r"git clone https://github.com/ryanoasis/nerd-fonts.git && cd ./nerd-fonts && ./install.sh")
 
-
+os.system("source ~/.zshrc && pyenv install 3.8.0 & && pyenv install 3.9.6 &")
