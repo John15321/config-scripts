@@ -97,7 +97,7 @@ os.system(r"curl https://sh.rustup.rs -sSf | sh -s -- -y")
 # Distro neutral
 
 for each in list_of_programs_without_gui_cargo:
-    os.system(r". $HOME/.cargo/env " + each)
+    os.system(r". $HOME/.cargo/env && " + each)
 
 if args.UI == "GUI":
     for each in list_of_programs_with_gui_snap:
