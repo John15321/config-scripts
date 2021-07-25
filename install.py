@@ -28,7 +28,7 @@ print(args)
 
 if args.distro == "Debian" or args.distro == "Rasp":
     os.system("sudo apt update && sudo apt upgrade -y")
-    os.system("sudo apt install build-essential -y")
+    os.system("sudo apt install build-essential git -y")
 
     # Other useful libraries that will comein handy at some point anyway:
     os.system(
@@ -43,14 +43,13 @@ elif args.distro == "Arch":
     os.system("sudo pacman -S --needed base-devel openssl zlib xz")
 
 
-
 # Install and configure ZSH
 
 if args.distro == "Debian" or args.distro == "Rasp":
     os.system("sudo apt-get install zsh -y")
-    os.system("chsh -s $(which zsh)")
+    os.system("sudo chsh -s $(which zsh)")
     os.system(
-        r'sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"'
+        r'sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)" &'
     )
 
 
@@ -61,6 +60,9 @@ if args.distro == "Debian" or args.distro == "Rasp":
 if args.distro == "Debian" or args.distro == "Rasp":
     os.system("sudo apt install fonts-powerline -y")
     os.system(
+        r"git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
+    )
+    os.system(
         r"git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting"
     )
     os.system(
@@ -69,7 +71,8 @@ if args.distro == "Debian" or args.distro == "Rasp":
 
 
 os.system(r"curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh")
-os.system(r"source $HOME/.cargo/env")
+# one of them should work
+os.system(r". $HOME/.cargo/env")
 # Install useful programs
 
 # With GUI
@@ -84,16 +87,17 @@ list_of_programs_with_gui_snap = [
 
 # Without GUI
 list_of_programs_without_gui_apt = [
-    "sudo apt install git -y",
     "sudo apt install neovim -y && curl -sLf https://spacevim.org/install.sh | bash",
 ]
 
 list_of_programs_without_gui_cargo = [
     "cargo install exa",
     "cargo install bat",
+    "cargo install lsd",
 ]
 
 # Distro neutral
+
 for each in list_of_programs_without_gui_cargo:
     os.system(each)
 
@@ -108,3 +112,15 @@ if args.distro == "Debian" or args.distro == "Rasp":
             os.system(each)
     for each in list_of_programs_without_gui_apt:
         os.system(each)
+
+
+# PYENV
+os.system(r"git clone https://github.com/pyenv/pyenv.git ~/.pyenv")
+
+# ZSHRC
+os.system("cp ./.zshrc ~/.zshrc")
+
+# NERD FONTS
+os.system(r"git clone https://github.com/ryanoasis/nerd-fonts.git && cd ./nerd-fonts && ./install.sh")
+
+
