@@ -1,5 +1,3 @@
-#!/bin/python3
-
 import os
 import argparse
 
@@ -70,7 +68,7 @@ if args.distro == "Debian" or args.distro == "Rasp":
     )
 
 
-os.system(r"curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh")
+os.system(r"curl https://sh.rustup.rs -sSf | sh -s -- -y")
 # one of them should work
 os.system(r". $HOME/.cargo/env")
 # Install useful programs
