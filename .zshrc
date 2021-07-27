@@ -114,9 +114,9 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 alias cat='bat'
 alias ls='exa'
-alias l='exa --tree -L 1 -a -l --git --icons'
-alias ll='exa --tree -L 2 -a -l --git --icons'
-alias lll='exa --tree -L 3 -a -l --git --icons'
+alias l='exa --tree -L 1 -a -l --git --icons -F'
+alias ll='exa --tree -L 2 -a -l --git --icons -F'
+alias lll='exa --tree -L 3 -a -l --git --icons -F'
 # alias tree='ls --tree'
 # alias tree3='tree -L 3'
 alias t='exa --tree -a -l --git --icons'
