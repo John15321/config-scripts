@@ -121,7 +121,7 @@ alias lll='exa --tree -L 3 -a -l --git --icons -F'
 # alias tree3='tree -L 3'
 alias t='exa --tree -a -l --git --icons'
 alias tree='alias ll='exa --tree -a -l --git --icons''
-alias btop='bottom'
+alias btop='btm'
 alias du='dust'
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
