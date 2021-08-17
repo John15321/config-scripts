@@ -47,7 +47,7 @@ list_of_programs_without_gui_cargo = [
     "cargo install hx",
     "cargo install tokei",
     "cargo install fd",
-    "cargo install dust",
+    "cargo install du-dust",
     "cargo install rm-improved",
     "cargo install bottom",
     
