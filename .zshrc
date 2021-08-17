@@ -121,7 +121,8 @@ alias lll='exa --tree -L 3 -a -l --git --icons -F'
 # alias tree3='tree -L 3'
 alias t='exa --tree -a -l --git --icons'
 alias tree='alias ll='exa --tree -a -l --git --icons''
-alias pygti="python -c \"import sys; import importlib; mod = 'urllib2' if sys.version_info[0] < 3 else 'urllib.request'; u = importlib.import_module(mod); open('gti-bootstrap.py', 'w').write(u.urlopen('https://devpi.dolby.net/gti/prod/gti-bootstrap/latest/+doc/_downloads/gti-bootstrap.py').read().decode('utf-8'))\""
+alias btop='bottom'
+alias du='dust'
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
