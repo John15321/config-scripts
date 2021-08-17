@@ -36,13 +36,21 @@ list_of_programs_with_gui_snap = [
 
 # Without GUI
 list_of_programs_without_gui_apt = [
-    "sudo apt install neovim -y && curl -sLf https://spacevim.org/install.sh | bash",
+    "sudo apt install neovim -y",
+    "sudo apt install ranger -y",
+    "sudo apt install neofetch -y",
 ]
 
 list_of_programs_without_gui_cargo = [
     "cargo install exa",
     "cargo install bat",
-    "cargo install lsd",
+    "cargo install hx",
+    "cargo install tokei",
+    "cargo install fd",
+    "cargo install dust",
+    "cargo install rm-improved",
+    "cargo install bottom",
+    
 ]
 
 if args.distro == "Debian" or args.distro == "Rasp":
@@ -66,7 +74,7 @@ elif args.distro == "Arch":
 
 if args.distro == "Debian" or args.distro == "Rasp":
     os.system("sudo apt-get install zsh -y")
-    os.system("sudo chsh -s $(which zsh)")
+    os.system("sudo chsh -s $(which zsh) $USER")
     os.system(
         r'sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)" &'
     )
@@ -119,4 +127,4 @@ os.system(r"git clone https://github.com/pyenv/pyenv.git ~/.pyenv")
 os.system("cp ./.zshrc ~/.zshrc")
 
 # NERD FONTS
-os.system(r"git clone https://github.com/ryanoasis/nerd-fonts.git && cd ./nerd-fonts && ./install.sh")
+# os.system(r"git clone https://github.com/ryanoasis/nerd-fonts.git && cd ./nerd-fonts && ./install.sh")
