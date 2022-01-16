@@ -84,6 +84,7 @@ plugins=(
     colored-man-pages
     colorize
     pip
+    vi-mode
     python
 )
 
@@ -110,27 +111,7 @@ source $ZSH/oh-my-zsh.sh
 # plugins, and themes. Aliases can be placed here, though oh-my-zsh
 # users are encouraged to define aliases within the ZSH_CUSTOM folder.
 # For a full list of active aliases, run `alias`.
-#
-# Example aliases
-alias cat='bat'
-alias ls='exa'
-alias l='exa --tree -L 1 -l --git --icons -F'
-alias ll='exa --tree -L 2 -l --git --icons -F'
-alias lll='exa --tree -L 3 -l --git --icons -F'
-alias la='l -a'
-alias lla='ll -a'
-alias llla='lll -a'
+MY_SHELL_CONFIG="/home/$USER/.my-shell-config"
+source ~/.my-shell-config/my_aliases
 
-# alias tree='ls --tree'
-# alias tree3='tree -L 3'
-alias t='exa --tree -a -l --git --icons'
-alias tree='alias ll='exa --tree -a -l --git --icons''
-alias btop='btm'
-alias du='dust'
-
-# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init --path)"
-EDITOR=nvim
+source ~/.my-shell-config/my_zshrc_config
