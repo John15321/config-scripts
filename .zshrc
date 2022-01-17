@@ -111,7 +111,7 @@ source $ZSH/oh-my-zsh.sh
 # plugins, and themes. Aliases can be placed here, though oh-my-zsh
 # users are encouraged to define aliases within the ZSH_CUSTOM folder.
 # For a full list of active aliases, run `alias`.
-MY_SHELL_CONFIG="/home/$USER/.my-shell-config"
+MY_SHELL_CONFIG="$HOME/.my-shell-config"
 source ~/.my-shell-config/my_aliases
 
 source ~/.my-shell-config/my_zshrc_config
