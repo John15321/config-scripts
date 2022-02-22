@@ -1,19 +1,38 @@
-import os
 import argparse
+import os
+from ast import arg
 
 parser = argparse.ArgumentParser(description="Installation parameters")
 parser.add_argument(
     "--UI",
-    type=str,
-    required=True,
+    type=bool,
+    required=False,
+    default=False,
     help="Should the installation procedure include GUI applications? (GUI || headless)",
 )
 
 parser.add_argument(
+    "--add_config",
+    type=bool,
+    required=False,
+    default=True,
+    help="Do you want to add my-shell-config to your system?",
+)
+
+parser.add_argument(
     "--other_tools",
-    type=str,
+    type=bool,
+    default=False,
     required=False,
     help="By default only development tools are installed, should other non dev programs (like Discord) be also installed? (yes || no)",
+)
+
+parser.add_argument(
+    "--install_nf",
+    type=bool,
+    default=False,
+    required=False,
+    help="Do you want to install all nerd fonts?",
 )
 args = parser.parse_args()
 print(args)
@@ -43,7 +62,6 @@ list_of_programs_without_gui_cargo = [
     "cargo install du-dust",
     "cargo install rm-improved",
     "cargo install bottom",
-    
 ]
 
 os.system("sudo apt-get update && sudo apt-get upgrade -y")
@@ -83,7 +101,7 @@ os.system(
 
 os.system(r"curl https://sh.rustup.rs -sSf | sh -s -- -y")
 ## one of them should work
-#os.system(r". $HOME/.cargo/env")
+# os.system(r". $HOME/.cargo/env")
 # Install useful programs
 
 # Distro neutral
@@ -91,12 +109,12 @@ os.system(r"curl https://sh.rustup.rs -sSf | sh -s -- -y")
 for each in list_of_programs_without_gui_cargo:
     os.system(r". $HOME/.cargo/env && " + each)
 
-if args.UI == "GUI":
+if args.UI:
     for each in list_of_programs_with_gui_snap:
         os.system(each)
 
 # Distro specific
-if args.UI == "GUI":
+if args.UI:
     for each in list_of_programs_with_gui_apt:
         os.system(each)
 for each in list_of_programs_without_gui_apt:
@@ -110,7 +128,13 @@ os.system(r"git clone https://github.com/pyenv/pyenv.git ~/.pyenv")
 os.system("cp ./.zshrc ~/.zshrc")
 
 # NERD FONTS
-# os.system(r"git clone https://github.com/ryanoasis/nerd-fonts.git && cd ./nerd-fonts && ./install.sh")
+if args.install_nf:
+    os.system(
+        r"git clone https://github.com/ryanoasis/nerd-fonts.git && cd ./nerd-fonts && ./install.sh"
+    )
 # MesloLGL Nerd Font Regular
 
-os.system(r"git clone https://gist.github.com/8522374427c55ca73c69324259f3e38a.git /home/$USER/.my-shell-config")
+if args.add_config:
+    os.system(
+        r"git clone https://github.com/John15321/my-shell-config.git $USER/.my-shell-config"
+    )
