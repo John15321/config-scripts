@@ -113,4 +113,4 @@ os.system("cp ./.zshrc ~/.zshrc")
 # os.system(r"git clone https://github.com/ryanoasis/nerd-fonts.git && cd ./nerd-fonts && ./install.sh")
 # MesloLGL Nerd Font Regular
 
-os.system(r"git clone https://gist.github.com/8522374427c55ca73c69324259f3e38a.git /home/$USER/.my-shell-config")
+os.system(r"git clone https://github.com/John15321/my-shell-config.git /home/$USER/.my-shell-config")
