@@ -43,6 +43,7 @@ list_of_programs_without_gui_cargo = [
     "cargo install du-dust",
     "cargo install rm-improved",
     "cargo install bottom",
+    "cargo install mcfly",
     
 ]
 
