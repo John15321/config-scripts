@@ -26,6 +26,7 @@ list_of_programs_with_gui_apt = [
 
 list_of_programs_with_gui_snap = [
     "sudo snap install code --classic",
+    "sudo snap install alacritty --classic",
 ]
 
 # Without GUI
@@ -33,10 +34,32 @@ list_of_programs_without_gui_apt = [
     "sudo apt-get install neovim -y",
     "sudo apt-get install ranger -y",
     "sudo apt-get install neofetch -y",
+    "sudo apt-get install tmux -y",
+    "sudo apt-get install gcc g++ -y",
+    "sudo apt-get install clang clangd -y",
+    "sudo apt-get install cmake -y",
+    "sudo apt-get install gdb -y",
+    "sudo apt-get install pipx -y",
+    # System administration tools
+    "sudo apt-get install htop btop iotop -y",
+    "sudo apt-get install ncdu tree -y",
+    "sudo apt-get install lsof strace -y",
+    "sudo apt-get install rsync unzip zip -y",
+    # Network tools
+    "sudo apt-get install curl wget -y",
+    "sudo apt-get install jq gnupg -y",  # Required for tofuenv
+    "sudo apt-get install nmap netcat-openbsd -y",
+    "sudo apt-get install dnsutils iputils-ping -y",
+    "sudo apt-get install traceroute mtr-tiny -y",
+    "sudo apt-get install tcpdump wireshark-common -y",
+    # Disk and filesystem tools
+    "sudo apt-get install smartmontools -y",
+    "sudo apt-get install parted gparted -y",
+    "sudo apt-get install hdparm -y",
 ]
 
 list_of_programs_without_gui_cargo = [
-    "cargo install exa",
+    "cargo install eza",
     "cargo install bat",
     "cargo install hx",
     "cargo install tokei",
@@ -47,8 +70,9 @@ list_of_programs_without_gui_cargo = [
     
 ]
 
+# Ensure we have git and basic build tools (in case running from fresh Ubuntu)
 os.system("sudo apt-get update && sudo apt-get upgrade -y")
-os.system("sudo apt-get install build-essential git -y")
+os.system("sudo apt-get install build-essential git python3 -y")
 # Other useful libraries that will comein handy at some point anyway:
 os.system(
     "sudo apt-get update; sudo apt-get install make build-essential libssl-dev zlib1g-dev \
@@ -81,10 +105,65 @@ os.system(
     r"git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
 )
 
+# Install Starship prompt
+os.system(r"curl -sS https://starship.rs/install.sh | sh -s -- -y")
+
+# Install uv (Python package manager)
+os.system(r"curl -LsSf https://astral.sh/uv/install.sh | sh")
+
+# Install Python versions via uv
+os.system(r". $HOME/.cargo/env && $HOME/.cargo/bin/uv python install 3.11 3.12 3.13 --default")
+
 
 os.system(r"curl https://sh.rustup.rs -sSf | sh -s -- -y")
 ## one of them should work
 #os.system(r". $HOME/.cargo/env")
+
+# Install Homebrew
+os.system(r'/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"')
+
+# Install version managers
+
+# SDKMAN (for Java, Kotlin, Scala, etc.)
+os.system(r'curl -s "https://get.sdkman.io" | bash')
+
+# GVM (Go Version Manager)
+os.system(r'bash < <(curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer)')
+
+# NVM (Node Version Manager) - using Homebrew
+os.system(r'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" && brew install nvm')
+
+# Install essential tools via Homebrew (only what's not managed by version managers)
+homebrew_packages = [
+    "jq",    # JSON processor (also installed via apt for tofuenv)
+    "fd",    # Alternative to find
+    "ripgrep",  # Alternative to grep
+    "fzf",   # Fuzzy finder
+    "yq",    # YAML processor
+    "bandwhich", # Network utilization monitor
+    "procs",  # Modern ps replacement
+]
+
+for package in homebrew_packages:
+    os.system(f'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" && brew install {package}')
+
+# Install tofuenv (OpenTofu version manager) via Homebrew
+os.system(r'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" && brew tap tofuutils/tap && brew install tofuenv')
+
+# VERSION MANAGERS INSTALLED:
+# - SDKMAN: Java, Kotlin, Scala, Groovy, etc. (installed above)
+# - GVM: Go Version Manager (installed above)
+# - NVM: Node Version Manager (installed above)
+# - HVM: Hugo Version Manager (installed above)
+# - tofuenv: OpenTofu Version Manager (installed above)
+# - UV: Python Version Manager (installed above)
+
+# HVM (Hugo Version Manager)
+os.system(r'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" && go install github.com/jmooring/hvm@latest')
+
+# Generate HVM alias for zsh (will be added at the end when zshrc is copied)
+# Note: This will be handled after .zshrc is copied to avoid conflicts
+
 # Install useful programs
 
 # Distro neutral
@@ -104,14 +183,45 @@ for each in list_of_programs_without_gui_apt:
     os.system(each)
 
 
-# PYENV
-os.system(r"git clone https://github.com/pyenv/pyenv.git ~/.pyenv")
+# PYENV removed - using uv for Python management instead
 
 # ZSHRC
 os.system("cp ./.zshrc ~/.zshrc")
+
+# TMUX CONFIG
+os.system("cp ./.tmux.conf ~/.tmux.conf")
+
+# NEOVIM CONFIG
+os.system("mkdir -p ~/.config/nvim")
+os.system("cp ./init.lua ~/.config/nvim/init.lua")
+
+# ALACRITTY CONFIG (if GUI mode)
+if args.UI == "GUI":
+    os.system("mkdir -p ~/.config/alacritty")
+    os.system("cp ./alacritty.toml ~/.config/alacritty/alacritty.toml")
+
+# Generate HVM alias and add to zshrc
+os.system(r'echo "" >> ~/.zshrc')
+os.system(r'echo "# HVM (Hugo Version Manager) alias" >> ~/.zshrc')
+os.system(r'$HOME/go/bin/hvm gen alias zsh >> ~/.zshrc')
 
 # NERD FONTS
 # os.system(r"git clone https://github.com/ryanoasis/nerd-fonts.git && cd ./nerd-fonts && ./install.sh")
 # MesloLGL Nerd Font Regular
 
-os.system(r"git clone https://github.com/John15321/my-shell-config.git /home/$USER/.my-shell-config")
+# my-shell-config removed - everything consolidated into .zshrc
+
+# NERD FONTS - Install FiraCode Nerd Font for Alacritty
+if args.UI == "GUI":
+    os.system("mkdir -p ~/.local/share/fonts")
+    os.system("wget -P ~/.local/share/fonts https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/FiraCode.zip")
+    os.system("cd ~/.local/share/fonts && unzip -o FiraCode.zip && rm FiraCode.zip")
+    os.system("fc-cache -fv")
+
+print("Installation completed! Please restart your shell or run 'source ~/.zshrc' to apply changes.")
+print("Don't forget to:")
+print("- Install a specific OpenTofu version: tofuenv use latest")
+print("- Install Python versions: uv python install 3.12")
+print("- Generate HVM alias: $HOME/go/bin/hvm gen alias zsh >> ~/.zshrc")
+if args.UI == "GUI":
+    print("- FiraCode Nerd Font installed for Alacritty")

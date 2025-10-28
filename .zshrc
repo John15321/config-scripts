@@ -15,7 +15,7 @@ export ZSH="$HOME/.oh-my-zsh"
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-ZSH_THEME='powerlevel10k/powerlevel10k'
+# ZSH_THEME='powerlevel10k/powerlevel10k'  # Disabled in favor of Starship
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -111,7 +111,109 @@ source $ZSH/oh-my-zsh.sh
 # plugins, and themes. Aliases can be placed here, though oh-my-zsh
 # users are encouraged to define aliases within the ZSH_CUSTOM folder.
 # For a full list of active aliases, run `alias`.
-MY_SHELL_CONFIG="$HOME/.my-shell-config"
-source ~/.my-shell-config/my_aliases
+# my-shell-config removed - everything consolidated here
 
-source ~/.my-shell-config/my_zshrc_config
+# Environment variables
+export EDITOR=nvim
+export GPG_TTY=$(tty)
+export NVM_DIR="$HOME/.nvm"
+
+# Homebrew
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+
+# Starship prompt
+eval "$(starship init zsh)"
+
+# NVM
+[ -s "$(brew --prefix nvm)/nvm.sh" ] && \. "$(brew --prefix nvm)/nvm.sh"
+
+# GVM (Go Version Manager)
+[[ -s "/home/janbronicki/.gvm/scripts/gvm" ]] && source "/home/janbronicki/.gvm/scripts/gvm"
+
+# Add Go bin to PATH (for tools like hvm)
+export PATH="$HOME/go/bin:$PATH"
+
+# tofuenv (OpenTofu version manager) - installed via Homebrew
+# No additional PATH needed, managed by Homebrew
+
+# NVM setup for Homebrew installation
+[ -s "$(brew --prefix)/opt/nvm/nvm.sh" ] && \. "$(brew --prefix)/opt/nvm/nvm.sh"
+[ -s "$(brew --prefix)/opt/nvm/etc/bash_completion.d/nvm" ] && \. "$(brew --prefix)/opt/nvm/etc/bash_completion.d/nvm"
+
+# SDKMAN - THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+export SDKMAN_DIR="$HOME/.sdkman"
+[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+
+# Aliases
+alias cat='bat'
+
+# --- eza (formerly exa) aliases ---
+alias ls='eza -F --group-directories-first --icons'
+alias l='eza --tree -L 1 -l --git --icons --group-directories-first --color=always'
+alias ll='eza --tree -L 2 -l --git --icons --group-directories-first --color=always'
+alias lll='eza --tree -L 3 -l --git --icons --group-directories-first --color=always'
+
+alias la='l -a'
+alias lla='ll -a'
+alias llla='lll -a'
+alias t='eza --tree -a -l --git --icons --group-directories-first --color=always'
+
+alias tree='eza --tree -a -l --git --icons --group-directories-first --color=always'
+
+# Python management via uv (replaces pyenv)
+# uv manages Python versions and virtual environments
+
+# Mcfly history search
+eval "$(mcfly init zsh)"
+
+# Local bin path
+export PATH="$HOME/.local/bin:$PATH"
+
+# UV (Python package manager) path
+export PATH="$HOME/.cargo/bin:$PATH"
+
+# Pipx path
+export PATH="$HOME/.local/bin:$PATH"
+
+# Local environment
+[ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"
+
+# ============= ALIASES =============
+# Basic shell aliases
+alias s='source'
+alias sz='s ~/.zshrc'
+alias oldcat='/bin/cat'
+
+# Git aliases
+alias gcr='git clone --recursive'
+
+# Python development aliases
+alias stdpipinstall='pip install -U pip && pip install ipython pytest black black[jupyter] flake8 pynvim matplotlib numpy pandas jupyterlab isort'
+alias flint="isort . -l 88 && black . --line-length 88 && flake8 . --max-line-length 88 --exclude gti-bootstrap.py,'./venv*'"
+alias pipinstallflint='pip install isort black flake8 black black[jupyter]'
+alias wp='which python'
+alias sa='source ./venv/bin/activate'
+alias stdvenvsetup='python -m venv venv && sa && echo "Using: $(wp)" && stdpipinstall && pipinstallflint'
+
+# UV Python management aliases
+alias uvenv='uv venv'  # Create virtual environment with uv
+alias uvact='source .venv/bin/activate'  # Activate uv virtual environment
+alias uvrun='uv run'   # Run command in uv environment
+alias uvinstall='uv add'  # Install packages with uv
+alias uvpython='uv python'  # Manage Python versions
+
+# System monitoring aliases
+alias top='btop'        # Better top
+alias disk='ncdu'       # Disk usage analyzer
+alias ports='lsof -i'   # Show open ports
+alias proc='procs'      # Modern ps replacement
+alias net='bandwhich'   # Network usage monitor
+
+# tofuenv (OpenTofu version manager) aliases
+alias tflist='tofuenv list'          # List installed OpenTofu versions
+alias tfuse='tofuenv use'            # Use specific OpenTofu version
+
+# Pipx aliases
+alias pxinstall='pipx install'       # Install Python apps globally
+alias pxlist='pipx list'             # List installed pipx apps
+alias pxupgrade='pipx upgrade-all'   # Upgrade all pipx apps
