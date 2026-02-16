@@ -1,7 +1,5 @@
 import os
 import argparse
-import platform
-import subprocess
 
 def detect_distro():
     """Detect the Linux distribution"""
@@ -14,10 +12,6 @@ def detect_distro():
     except FileNotFoundError:
         pass
     return 'unknown'
-
-def run_command(cmd):
-    """Run a shell command"""
-    return os.system(cmd)
 
 distro = detect_distro()
 print(f"Detected distribution: {distro}")
@@ -40,84 +34,67 @@ args = parser.parse_args()
 print(args)
 
 
-# Package mappings for different distributions
-# Format: {package_category: {distro: [package_names]}}
-
 # With GUI
-packages_with_gui = {
-    'ubuntu': [
-        "tilix",
-    ],
-    'debian': [
-        "tilix",
-    ],
-    'gentoo': [
-        "x11-terms/tilix",
-    ]
-}
+list_of_programs_with_gui_apt = [
+    "sudo apt-get install tilix -y",
+]
 
-packages_with_gui_snap = {
-    'ubuntu': [
-        ("code", "--classic"),
-        ("alacritty", "--classic"),
-    ],
-    'debian': [
-        ("code", "--classic"),
-        ("alacritty", "--classic"),
-    ],
-    'gentoo': [
-        # Gentoo uses emerge or flatpak, not snap
-    ]
-}
+list_of_programs_with_gui_snap = [
+    "sudo snap install code --classic",
+    "sudo snap install alacritty --classic",
+]
 
-packages_with_gui_emerge_only = [
-    "app-editors/vscode",  # VSCode via emerge
-    "x11-terms/alacritty",  # Alacritty
+# Gentoo GUI packages
+list_of_programs_with_gui_gentoo = [
+    "sudo emerge --ask=n x11-terms/tilix",
+    "sudo emerge --ask=n app-editors/vscode",
+    "sudo emerge --ask=n x11-terms/alacritty",
 ]
 
 # Without GUI
-packages_without_gui = {
-    'ubuntu': [
-        "neovim", "ranger", "neofetch", "tmux",
-        "gcc", "g++", "clang", "clangd", "cmake", "gdb", "pipx",
-        # System administration tools
-        "htop", "btop", "iotop", "ncdu", "tree", "lsof", "strace",
-        "rsync", "unzip", "zip",
-        # Network tools
-        "curl", "wget", "jq", "gnupg", "nmap", "netcat-openbsd",
-        "dnsutils", "iputils-ping", "traceroute", "mtr-tiny",
-        "tcpdump", "wireshark-common",
-        # Disk and filesystem tools
-        "smartmontools", "parted", "gparted", "hdparm",
-    ],
-    'debian': [
-        "neovim", "ranger", "neofetch", "tmux",
-        "gcc", "g++", "clang", "clangd", "cmake", "gdb", "pipx",
-        # System administration tools
-        "htop", "btop", "iotop", "ncdu", "tree", "lsof", "strace",
-        "rsync", "unzip", "zip",
-        # Network tools
-        "curl", "wget", "jq", "gnupg", "nmap", "netcat-openbsd",
-        "dnsutils", "iputils-ping", "traceroute", "mtr-tiny",
-        "tcpdump", "wireshark-common",
-        # Disk and filesystem tools
-        "smartmontools", "parted", "gparted", "hdparm",
-    ],
-    'gentoo': [
-        "app-editors/neovim", "app-misc/ranger", "app-misc/neofetch", "app-misc/tmux",
-        "sys-devel/gcc", "sys-devel/clang", "sys-devel/clang-runtime", "dev-util/cmake", "sys-devel/gdb", "dev-python/pipx",
-        # System administration tools
-        "sys-process/htop", "sys-process/btop", "sys-process/iotop", "sys-fs/ncdu", "app-text/tree",
-        "sys-process/lsof", "dev-util/strace",
-        "net-misc/rsync", "app-arch/unzip", "app-arch/zip",
-        # Network tools
-        "net-misc/curl", "net-misc/wget", "app-misc/jq", "app-crypt/gnupg", "net-analyzer/nmap",
-        "net-analyzer/netcat", "net-dns/bind-tools", "net-misc/iputils",
-        "net-analyzer/traceroute", "net-analyzer/mtr", "net-analyzer/tcpdump", "net-analyzer/wireshark",
-        # Disk and filesystem tools
-        "sys-apps/smartmontools", "sys-block/parted", "sys-block/gparted", "sys-apps/hdparm",
-    ]
-}
+list_of_programs_without_gui_apt = [
+    "sudo apt-get install neovim -y",
+    "sudo apt-get install ranger -y",
+    "sudo apt-get install neofetch -y",
+    "sudo apt-get install tmux -y",
+    "sudo apt-get install gcc g++ -y",
+    "sudo apt-get install clang clangd -y",
+    "sudo apt-get install cmake -y",
+    "sudo apt-get install gdb -y",
+    "sudo apt-get install pipx -y",
+    # System administration tools
+    "sudo apt-get install htop btop iotop -y",
+    "sudo apt-get install ncdu tree -y",
+    "sudo apt-get install lsof strace -y",
+    "sudo apt-get install rsync unzip zip -y",
+    # Network tools
+    "sudo apt-get install curl wget -y",
+    "sudo apt-get install jq gnupg -y",  # Required for tofuenv
+    "sudo apt-get install nmap netcat-openbsd -y",
+    "sudo apt-get install dnsutils iputils-ping -y",
+    "sudo apt-get install traceroute mtr-tiny -y",
+    "sudo apt-get install tcpdump wireshark-common -y",
+    # Disk and filesystem tools
+    "sudo apt-get install smartmontools -y",
+    "sudo apt-get install parted gparted -y",
+    "sudo apt-get install hdparm -y",
+]
+
+# Gentoo headless packages
+list_of_programs_without_gui_gentoo = [
+    "sudo emerge --ask=n app-editors/neovim app-misc/ranger app-misc/neofetch app-misc/tmux",
+    "sudo emerge --ask=n sys-devel/gcc sys-devel/clang sys-devel/clang-runtime dev-util/cmake sys-devel/gdb dev-python/pipx",
+    # System administration tools
+    "sudo emerge --ask=n sys-process/htop sys-process/btop sys-process/iotop sys-fs/ncdu app-text/tree",
+    "sudo emerge --ask=n sys-process/lsof dev-util/strace",
+    "sudo emerge --ask=n net-misc/rsync app-arch/unzip app-arch/zip",
+    # Network tools
+    "sudo emerge --ask=n net-misc/curl net-misc/wget app-misc/jq app-crypt/gnupg net-analyzer/nmap",
+    "sudo emerge --ask=n net-analyzer/netcat net-dns/bind-tools net-misc/iputils",
+    "sudo emerge --ask=n net-analyzer/traceroute net-analyzer/mtr net-analyzer/tcpdump net-analyzer/wireshark",
+    # Disk and filesystem tools
+    "sudo emerge --ask=n sys-apps/smartmontools sys-block/parted sys-block/gparted sys-apps/hdparm",
+]
 
 list_of_programs_without_gui_cargo = [
     "cargo install eza",
@@ -131,97 +108,61 @@ list_of_programs_without_gui_cargo = [
     
 ]
 
-def install_base_packages(distro):
-    """Install base packages depending on distribution"""
-    if distro in ['ubuntu', 'debian']:
-        os.system("sudo apt-get update && sudo apt-get upgrade -y")
-        os.system("sudo apt-get install build-essential git python3 -y")
-        # Other useful libraries
-        os.system(
-            "sudo apt-get update; sudo apt-get install make build-essential libssl-dev zlib1g-dev \
-libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm \
-libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev -y"
-        )
-    elif distro == 'gentoo':
-        # Sync portage tree
-        os.system("sudo emerge --sync")
-        # Install base system packages (most should already be installed on Gentoo)
-        os.system("sudo emerge --ask=n sys-devel/gcc sys-devel/make dev-vcs/git dev-lang/python")
-        # Development libraries
-        os.system(
-            "sudo emerge --ask=n dev-libs/openssl sys-libs/zlib \
+# Ensure we have git and basic build tools (in case running from fresh Ubuntu or Gentoo)
+if distro == 'gentoo':
+    # Gentoo-specific initialization
+    os.system("sudo emerge --sync")
+    os.system("sudo emerge --ask=n sys-devel/gcc sys-devel/make dev-vcs/git dev-lang/python")
+    # Development libraries
+    os.system(
+        "sudo emerge --ask=n dev-libs/openssl sys-libs/zlib \
 app-arch/bzip2 sys-libs/readline dev-db/sqlite net-misc/wget net-misc/curl \
 sys-devel/llvm sys-libs/ncurses app-arch/xz-utils dev-lang/tk \
-dev-libs/libxml2 dev-libs/xmlsec dev-libs/libffi app-arch/xz-utils"
-        )
-
-def install_zsh(distro):
-    """Install and configure ZSH"""
-    if distro in ['ubuntu', 'debian']:
-        os.system("sudo apt-get install zsh -y")
-    elif distro == 'gentoo':
-        os.system("sudo emerge --ask=n app-shells/zsh")
-    
-    os.system("sudo chsh -s $(which zsh) $USER")
+dev-libs/libxml2 dev-libs/xmlsec dev-libs/libffi"
+    )
+else:
+    # Ubuntu/Debian initialization (original code)
+    os.system("sudo apt-get update && sudo apt-get upgrade -y")
+    os.system("sudo apt-get install build-essential git python3 -y")
+    # Other useful libraries that will comein handy at some point anyway:
     os.system(
-        r'sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)" &'
+        "sudo apt-get update; sudo apt-get install make build-essential libssl-dev zlib1g-dev \
+libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm \
+libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev -y"
     )
 
-def install_fonts_and_themes(distro):
-    """Install fonts and terminal themes"""
-    if distro in ['ubuntu', 'debian']:
-        os.system("sudo apt-get install fonts-powerline -y")
-    elif distro == 'gentoo':
-        os.system("sudo emerge --ask=n media-fonts/powerline-fonts")
-    
-    os.system(
-        r"git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
-    )
-    os.system(
-        r"git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting"
-    )
-    os.system(
-        r"git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
-    )
-
-def install_gui_packages(distro):
-    """Install GUI packages"""
-    if distro in ['ubuntu', 'debian']:
-        for pkg in packages_with_gui.get(distro, []):
-            os.system(f"sudo apt-get install {pkg} -y")
-        for pkg, flags in packages_with_gui_snap.get(distro, []):
-            os.system(f"sudo snap install {pkg} {flags}")
-    elif distro == 'gentoo':
-        for pkg in packages_with_gui.get(distro, []):
-            os.system(f"sudo emerge --ask=n {pkg}")
-        for pkg in packages_with_gui_emerge_only:
-            os.system(f"sudo emerge --ask=n {pkg}")
-
-def install_headless_packages(distro):
-    """Install headless/CLI packages"""
-    if distro in ['ubuntu', 'debian']:
-        for pkg in packages_without_gui.get(distro, []):
-            os.system(f"sudo apt-get install {pkg} -y")
-    elif distro == 'gentoo':
-        # Install packages in batches for efficiency
-        pkgs = packages_without_gui.get(distro, [])
-        # Split into batches of 10 packages to avoid command line too long
-        batch_size = 10
-        for i in range(0, len(pkgs), batch_size):
-            batch = ' '.join(pkgs[i:i+batch_size])
-            os.system(f"sudo emerge --ask=n {batch}")
-
-# Ensure we have git and basic build tools
-install_base_packages(distro)
 
 # Install and configure ZSH
-install_zsh(distro)
+
+if distro == 'gentoo':
+    os.system("sudo emerge --ask=n app-shells/zsh")
+else:
+    os.system("sudo apt-get install zsh -y")
+
+os.system("sudo chsh -s $(which zsh) $USER")
+os.system(
+    r'sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)" &'
+)
 
 
 # Install and configure useful command line tools
 
+
 # Install and configure terminal theming/powerlevel10k etc
-install_fonts_and_themes(distro)
+if distro == 'gentoo':
+    os.system("sudo emerge --ask=n media-fonts/powerline-fonts")
+else:
+    os.system("sudo apt-get install fonts-powerline -y")
+
+os.system(
+    r"git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
+)
+os.system(
+    r"git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting"
+)
+os.system(
+    r"git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
+)
 
 # Install Starship prompt
 os.system(r"curl -sS https://starship.rs/install.sh | sh -s -- -y")
@@ -284,16 +225,38 @@ os.system(r'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" && go install
 
 # Install useful programs
 
-# Distro neutral cargo packages
+# Distro neutral
+
 for each in list_of_programs_without_gui_cargo:
     os.system(r". $HOME/.cargo/env && " + each)
 
-# Install GUI packages if requested
 if args.UI == "GUI":
-    install_gui_packages(distro)
+    if distro == 'gentoo':
+        # Install Gentoo GUI packages
+        for each in list_of_programs_with_gui_gentoo:
+            os.system(each)
+    else:
+        # Install Ubuntu/Debian GUI packages (original code)
+        for each in list_of_programs_with_gui_snap:
+            os.system(each)
 
-# Install headless packages
-install_headless_packages(distro)
+# Distro specific
+if args.UI == "GUI":
+    if distro == 'gentoo':
+        pass  # Already handled above
+    else:
+        # Ubuntu/Debian (original code)
+        for each in list_of_programs_with_gui_apt:
+            os.system(each)
+
+if distro == 'gentoo':
+    # Install Gentoo headless packages
+    for each in list_of_programs_without_gui_gentoo:
+        os.system(each)
+else:
+    # Ubuntu/Debian (original code)
+    for each in list_of_programs_without_gui_apt:
+        os.system(each)
 
 
 # PYENV removed - using uv for Python management instead
