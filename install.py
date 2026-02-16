@@ -124,7 +124,7 @@ else:
     # Ubuntu/Debian initialization (original code)
     os.system("sudo apt-get update && sudo apt-get upgrade -y")
     os.system("sudo apt-get install build-essential git python3 -y")
-    # Other useful libraries that will comein handy at some point anyway:
+    # Other useful libraries that will come in handy at some point anyway:
     os.system(
         "sudo apt-get update; sudo apt-get install make build-essential libssl-dev zlib1g-dev \
 libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm \
@@ -239,16 +239,10 @@ if args.UI == "GUI":
         # Install Ubuntu/Debian GUI packages (original code)
         for each in list_of_programs_with_gui_snap:
             os.system(each)
-
-# Distro specific
-if args.UI == "GUI":
-    if distro == 'gentoo':
-        pass  # Already handled above
-    else:
-        # Ubuntu/Debian (original code)
         for each in list_of_programs_with_gui_apt:
             os.system(each)
 
+# Distro specific headless packages
 if distro == 'gentoo':
     # Install Gentoo headless packages
     for each in list_of_programs_without_gui_gentoo:
@@ -290,18 +284,14 @@ os.system(r'$HOME/go/bin/hvm gen alias zsh >> ~/.zshrc')
 # NERD FONTS - Install FiraCode Nerd Font for Alacritty
 if args.UI == "GUI":
     if distro == 'gentoo':
-        # On Gentoo, we can use emerge or manual installation
+        # On Gentoo, also install via emerge for system-wide availability
         os.system("sudo emerge --ask=n media-fonts/firacode")
-        # Also install nerd-fonts version manually for full support
-        os.system("mkdir -p ~/.local/share/fonts")
-        os.system("wget -P ~/.local/share/fonts https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/FiraCode.zip")
-        os.system("cd ~/.local/share/fonts && unzip -o FiraCode.zip && rm FiraCode.zip")
-        os.system("fc-cache -fv")
-    else:
-        os.system("mkdir -p ~/.local/share/fonts")
-        os.system("wget -P ~/.local/share/fonts https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/FiraCode.zip")
-        os.system("cd ~/.local/share/fonts && unzip -o FiraCode.zip && rm FiraCode.zip")
-        os.system("fc-cache -fv")
+    
+    # Install nerd-fonts version manually for full support (common for all distros)
+    os.system("mkdir -p ~/.local/share/fonts")
+    os.system("wget -P ~/.local/share/fonts https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/FiraCode.zip")
+    os.system("cd ~/.local/share/fonts && unzip -o FiraCode.zip && rm FiraCode.zip")
+    os.system("fc-cache -fv")
 
 print("Installation completed! Please restart your shell or run 'source ~/.zshrc' to apply changes.")
 print("Don't forget to:")
