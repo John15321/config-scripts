@@ -1,6 +1,21 @@
 import os
 import argparse
 
+def detect_distro():
+    """Detect the Linux distribution"""
+    try:
+        with open('/etc/os-release', 'r') as f:
+            for line in f:
+                if line.startswith('ID='):
+                    distro = line.strip().split('=')[1].strip('"')
+                    return distro
+    except FileNotFoundError:
+        pass
+    return 'unknown'
+
+distro = detect_distro()
+print(f"Detected distribution: {distro}")
+
 parser = argparse.ArgumentParser(description="Installation parameters")
 parser.add_argument(
     "--UI",
@@ -27,6 +42,13 @@ list_of_programs_with_gui_apt = [
 list_of_programs_with_gui_snap = [
     "sudo snap install code --classic",
     "sudo snap install alacritty --classic",
+]
+
+# Gentoo GUI packages
+list_of_programs_with_gui_gentoo = [
+    "sudo emerge --ask=n x11-terms/tilix",
+    "sudo emerge --ask=n app-editors/vscode",
+    "sudo emerge --ask=n x11-terms/alacritty",
 ]
 
 # Without GUI
@@ -58,6 +80,22 @@ list_of_programs_without_gui_apt = [
     "sudo apt-get install hdparm -y",
 ]
 
+# Gentoo headless packages
+list_of_programs_without_gui_gentoo = [
+    "sudo emerge --ask=n app-editors/neovim app-misc/ranger app-misc/neofetch app-misc/tmux",
+    "sudo emerge --ask=n sys-devel/gcc sys-devel/clang sys-devel/clang-runtime dev-util/cmake sys-devel/gdb dev-python/pipx",
+    # System administration tools
+    "sudo emerge --ask=n sys-process/htop sys-process/btop sys-process/iotop sys-fs/ncdu app-text/tree",
+    "sudo emerge --ask=n sys-process/lsof dev-util/strace",
+    "sudo emerge --ask=n net-misc/rsync app-arch/unzip app-arch/zip",
+    # Network tools
+    "sudo emerge --ask=n net-misc/curl net-misc/wget app-misc/jq app-crypt/gnupg net-analyzer/nmap",
+    "sudo emerge --ask=n net-analyzer/netcat net-dns/bind-tools net-misc/iputils",
+    "sudo emerge --ask=n net-analyzer/traceroute net-analyzer/mtr net-analyzer/tcpdump net-analyzer/wireshark",
+    # Disk and filesystem tools
+    "sudo emerge --ask=n sys-apps/smartmontools sys-block/parted sys-block/gparted sys-apps/hdparm",
+]
+
 list_of_programs_without_gui_cargo = [
     "cargo install eza",
     "cargo install bat",
@@ -70,20 +108,37 @@ list_of_programs_without_gui_cargo = [
     
 ]
 
-# Ensure we have git and basic build tools (in case running from fresh Ubuntu)
-os.system("sudo apt-get update && sudo apt-get upgrade -y")
-os.system("sudo apt-get install build-essential git python3 -y")
-# Other useful libraries that will comein handy at some point anyway:
-os.system(
-    "sudo apt-get update; sudo apt-get install make build-essential libssl-dev zlib1g-dev \
+# Ensure we have git and basic build tools (in case running from fresh Ubuntu or Gentoo)
+if distro == 'gentoo':
+    # Gentoo-specific initialization
+    os.system("sudo emerge --sync")
+    os.system("sudo emerge --ask=n sys-devel/gcc sys-devel/make dev-vcs/git dev-lang/python")
+    # Development libraries
+    os.system(
+        "sudo emerge --ask=n dev-libs/openssl sys-libs/zlib \
+app-arch/bzip2 sys-libs/readline dev-db/sqlite net-misc/wget net-misc/curl \
+sys-devel/llvm sys-libs/ncurses app-arch/xz-utils dev-lang/tk \
+dev-libs/libxml2 dev-libs/xmlsec dev-libs/libffi"
+    )
+else:
+    # Ubuntu/Debian initialization (original code)
+    os.system("sudo apt-get update && sudo apt-get upgrade -y")
+    os.system("sudo apt-get install build-essential git python3 -y")
+    # Other useful libraries that will come in handy at some point anyway:
+    os.system(
+        "sudo apt-get update; sudo apt-get install make build-essential libssl-dev zlib1g-dev \
 libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm \
 libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev -y"
-)
+    )
 
 
 # Install and configure ZSH
 
-os.system("sudo apt-get install zsh -y")
+if distro == 'gentoo':
+    os.system("sudo emerge --ask=n app-shells/zsh")
+else:
+    os.system("sudo apt-get install zsh -y")
+
 os.system("sudo chsh -s $(which zsh) $USER")
 os.system(
     r'sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)" &'
@@ -94,7 +149,11 @@ os.system(
 
 
 # Install and configure terminal theming/powerlevel10k etc
-os.system("sudo apt-get install fonts-powerline -y")
+if distro == 'gentoo':
+    os.system("sudo emerge --ask=n media-fonts/powerline-fonts")
+else:
+    os.system("sudo apt-get install fonts-powerline -y")
+
 os.system(
     r"git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
 )
@@ -172,15 +231,26 @@ for each in list_of_programs_without_gui_cargo:
     os.system(r". $HOME/.cargo/env && " + each)
 
 if args.UI == "GUI":
-    for each in list_of_programs_with_gui_snap:
-        os.system(each)
+    if distro == 'gentoo':
+        # Install Gentoo GUI packages
+        for each in list_of_programs_with_gui_gentoo:
+            os.system(each)
+    else:
+        # Install Ubuntu/Debian GUI packages (original code)
+        for each in list_of_programs_with_gui_snap:
+            os.system(each)
+        for each in list_of_programs_with_gui_apt:
+            os.system(each)
 
-# Distro specific
-if args.UI == "GUI":
-    for each in list_of_programs_with_gui_apt:
+# Distro specific headless packages
+if distro == 'gentoo':
+    # Install Gentoo headless packages
+    for each in list_of_programs_without_gui_gentoo:
         os.system(each)
-for each in list_of_programs_without_gui_apt:
-    os.system(each)
+else:
+    # Ubuntu/Debian (original code)
+    for each in list_of_programs_without_gui_apt:
+        os.system(each)
 
 
 # PYENV removed - using uv for Python management instead
@@ -213,6 +283,11 @@ os.system(r'$HOME/go/bin/hvm gen alias zsh >> ~/.zshrc')
 
 # NERD FONTS - Install FiraCode Nerd Font for Alacritty
 if args.UI == "GUI":
+    if distro == 'gentoo':
+        # On Gentoo, also install via emerge for system-wide availability
+        os.system("sudo emerge --ask=n media-fonts/firacode")
+    
+    # Install nerd-fonts version manually for full support (common for all distros)
     os.system("mkdir -p ~/.local/share/fonts")
     os.system("wget -P ~/.local/share/fonts https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/FiraCode.zip")
     os.system("cd ~/.local/share/fonts && unzip -o FiraCode.zip && rm FiraCode.zip")
