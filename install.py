@@ -1,5 +1,26 @@
 import os
 import argparse
+import platform
+import subprocess
+
+def detect_distro():
+    """Detect the Linux distribution"""
+    try:
+        with open('/etc/os-release', 'r') as f:
+            for line in f:
+                if line.startswith('ID='):
+                    distro = line.strip().split('=')[1].strip('"')
+                    return distro
+    except FileNotFoundError:
+        pass
+    return 'unknown'
+
+def run_command(cmd):
+    """Run a shell command"""
+    return os.system(cmd)
+
+distro = detect_distro()
+print(f"Detected distribution: {distro}")
 
 parser = argparse.ArgumentParser(description="Installation parameters")
 parser.add_argument(
@@ -19,44 +40,84 @@ args = parser.parse_args()
 print(args)
 
 
-# With GUI
-list_of_programs_with_gui_apt = [
-    "sudo apt-get install tilix -y",
-]
+# Package mappings for different distributions
+# Format: {package_category: {distro: [package_names]}}
 
-list_of_programs_with_gui_snap = [
-    "sudo snap install code --classic",
-    "sudo snap install alacritty --classic",
+# With GUI
+packages_with_gui = {
+    'ubuntu': [
+        "tilix",
+    ],
+    'debian': [
+        "tilix",
+    ],
+    'gentoo': [
+        "x11-terms/tilix",
+    ]
+}
+
+packages_with_gui_snap = {
+    'ubuntu': [
+        ("code", "--classic"),
+        ("alacritty", "--classic"),
+    ],
+    'debian': [
+        ("code", "--classic"),
+        ("alacritty", "--classic"),
+    ],
+    'gentoo': [
+        # Gentoo uses emerge or flatpak, not snap
+    ]
+}
+
+packages_with_gui_emerge_only = [
+    "app-editors/vscode",  # VSCode via emerge
+    "x11-terms/alacritty",  # Alacritty
 ]
 
 # Without GUI
-list_of_programs_without_gui_apt = [
-    "sudo apt-get install neovim -y",
-    "sudo apt-get install ranger -y",
-    "sudo apt-get install neofetch -y",
-    "sudo apt-get install tmux -y",
-    "sudo apt-get install gcc g++ -y",
-    "sudo apt-get install clang clangd -y",
-    "sudo apt-get install cmake -y",
-    "sudo apt-get install gdb -y",
-    "sudo apt-get install pipx -y",
-    # System administration tools
-    "sudo apt-get install htop btop iotop -y",
-    "sudo apt-get install ncdu tree -y",
-    "sudo apt-get install lsof strace -y",
-    "sudo apt-get install rsync unzip zip -y",
-    # Network tools
-    "sudo apt-get install curl wget -y",
-    "sudo apt-get install jq gnupg -y",  # Required for tofuenv
-    "sudo apt-get install nmap netcat-openbsd -y",
-    "sudo apt-get install dnsutils iputils-ping -y",
-    "sudo apt-get install traceroute mtr-tiny -y",
-    "sudo apt-get install tcpdump wireshark-common -y",
-    # Disk and filesystem tools
-    "sudo apt-get install smartmontools -y",
-    "sudo apt-get install parted gparted -y",
-    "sudo apt-get install hdparm -y",
-]
+packages_without_gui = {
+    'ubuntu': [
+        "neovim", "ranger", "neofetch", "tmux",
+        "gcc", "g++", "clang", "clangd", "cmake", "gdb", "pipx",
+        # System administration tools
+        "htop", "btop", "iotop", "ncdu", "tree", "lsof", "strace",
+        "rsync", "unzip", "zip",
+        # Network tools
+        "curl", "wget", "jq", "gnupg", "nmap", "netcat-openbsd",
+        "dnsutils", "iputils-ping", "traceroute", "mtr-tiny",
+        "tcpdump", "wireshark-common",
+        # Disk and filesystem tools
+        "smartmontools", "parted", "gparted", "hdparm",
+    ],
+    'debian': [
+        "neovim", "ranger", "neofetch", "tmux",
+        "gcc", "g++", "clang", "clangd", "cmake", "gdb", "pipx",
+        # System administration tools
+        "htop", "btop", "iotop", "ncdu", "tree", "lsof", "strace",
+        "rsync", "unzip", "zip",
+        # Network tools
+        "curl", "wget", "jq", "gnupg", "nmap", "netcat-openbsd",
+        "dnsutils", "iputils-ping", "traceroute", "mtr-tiny",
+        "tcpdump", "wireshark-common",
+        # Disk and filesystem tools
+        "smartmontools", "parted", "gparted", "hdparm",
+    ],
+    'gentoo': [
+        "app-editors/neovim", "app-misc/ranger", "app-misc/neofetch", "app-misc/tmux",
+        "sys-devel/gcc", "sys-devel/clang", "dev-util/cmake", "sys-devel/gdb", "dev-python/pipx",
+        # System administration tools
+        "sys-process/htop", "sys-process/btop", "sys-process/iotop", "sys-fs/ncdu", "app-text/tree",
+        "sys-process/lsof", "dev-util/strace",
+        "net-misc/rsync", "app-arch/unzip", "app-arch/zip",
+        # Network tools
+        "net-misc/curl", "net-misc/wget", "app-misc/jq", "app-crypt/gnupg", "net-analyzer/nmap",
+        "net-analyzer/netcat", "net-dns/bind-tools", "net-misc/iputils",
+        "net-analyzer/traceroute", "net-analyzer/mtr", "net-analyzer/tcpdump", "net-analyzer/wireshark",
+        # Disk and filesystem tools
+        "sys-apps/smartmontools", "sys-block/parted", "sys-block/gparted", "sys-apps/hdparm",
+    ]
+}
 
 list_of_programs_without_gui_cargo = [
     "cargo install eza",
@@ -70,40 +131,97 @@ list_of_programs_without_gui_cargo = [
     
 ]
 
-# Ensure we have git and basic build tools (in case running from fresh Ubuntu)
-os.system("sudo apt-get update && sudo apt-get upgrade -y")
-os.system("sudo apt-get install build-essential git python3 -y")
-# Other useful libraries that will comein handy at some point anyway:
-os.system(
-    "sudo apt-get update; sudo apt-get install make build-essential libssl-dev zlib1g-dev \
+def install_base_packages(distro):
+    """Install base packages depending on distribution"""
+    if distro in ['ubuntu', 'debian']:
+        os.system("sudo apt-get update && sudo apt-get upgrade -y")
+        os.system("sudo apt-get install build-essential git python3 -y")
+        # Other useful libraries
+        os.system(
+            "sudo apt-get update; sudo apt-get install make build-essential libssl-dev zlib1g-dev \
 libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm \
 libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev -y"
-)
+        )
+    elif distro == 'gentoo':
+        # Sync portage tree
+        os.system("sudo emerge --sync")
+        # Install base system packages (most should already be installed on Gentoo)
+        os.system("sudo emerge --ask=n sys-devel/gcc sys-devel/make dev-vcs/git dev-lang/python")
+        # Development libraries
+        os.system(
+            "sudo emerge --ask=n dev-libs/openssl sys-libs/zlib \
+app-arch/bzip2 sys-libs/readline dev-db/sqlite net-misc/wget net-misc/curl \
+sys-devel/llvm sys-libs/ncurses app-arch/xz-utils dev-lang/tk \
+dev-libs/libxml2 dev-libs/xmlsec dev-libs/libffi app-arch/xz-utils"
+        )
 
+def install_zsh(distro):
+    """Install and configure ZSH"""
+    if distro in ['ubuntu', 'debian']:
+        os.system("sudo apt-get install zsh -y")
+    elif distro == 'gentoo':
+        os.system("sudo emerge --ask=n app-shells/zsh")
+    
+    os.system("sudo chsh -s $(which zsh) $USER")
+    os.system(
+        r'sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)" &'
+    )
+
+def install_fonts_and_themes(distro):
+    """Install fonts and terminal themes"""
+    if distro in ['ubuntu', 'debian']:
+        os.system("sudo apt-get install fonts-powerline -y")
+    elif distro == 'gentoo':
+        os.system("sudo emerge --ask=n media-fonts/powerline-fonts")
+    
+    os.system(
+        r"git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
+    )
+    os.system(
+        r"git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting"
+    )
+    os.system(
+        r"git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
+    )
+
+def install_gui_packages(distro):
+    """Install GUI packages"""
+    if distro in ['ubuntu', 'debian']:
+        for pkg in packages_with_gui.get(distro, []):
+            os.system(f"sudo apt-get install {pkg} -y")
+        for pkg, flags in packages_with_gui_snap.get(distro, []):
+            os.system(f"sudo snap install {pkg} {flags}")
+    elif distro == 'gentoo':
+        for pkg in packages_with_gui.get(distro, []):
+            os.system(f"sudo emerge --ask=n {pkg}")
+        for pkg in packages_with_gui_emerge_only:
+            os.system(f"sudo emerge --ask=n {pkg}")
+
+def install_headless_packages(distro):
+    """Install headless/CLI packages"""
+    if distro in ['ubuntu', 'debian']:
+        for pkg in packages_without_gui.get(distro, []):
+            os.system(f"sudo apt-get install {pkg} -y")
+    elif distro == 'gentoo':
+        # Install packages in batches for efficiency
+        pkgs = packages_without_gui.get(distro, [])
+        # Split into batches of 10 packages to avoid command line too long
+        batch_size = 10
+        for i in range(0, len(pkgs), batch_size):
+            batch = ' '.join(pkgs[i:i+batch_size])
+            os.system(f"sudo emerge --ask=n {batch}")
+
+# Ensure we have git and basic build tools
+install_base_packages(distro)
 
 # Install and configure ZSH
-
-os.system("sudo apt-get install zsh -y")
-os.system("sudo chsh -s $(which zsh) $USER")
-os.system(
-    r'sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)" &'
-)
+install_zsh(distro)
 
 
 # Install and configure useful command line tools
 
-
 # Install and configure terminal theming/powerlevel10k etc
-os.system("sudo apt-get install fonts-powerline -y")
-os.system(
-    r"git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
-)
-os.system(
-    r"git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting"
-)
-os.system(
-    r"git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
-)
+install_fonts_and_themes(distro)
 
 # Install Starship prompt
 os.system(r"curl -sS https://starship.rs/install.sh | sh -s -- -y")
@@ -166,21 +284,16 @@ os.system(r'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" && go install
 
 # Install useful programs
 
-# Distro neutral
-
+# Distro neutral cargo packages
 for each in list_of_programs_without_gui_cargo:
     os.system(r". $HOME/.cargo/env && " + each)
 
+# Install GUI packages if requested
 if args.UI == "GUI":
-    for each in list_of_programs_with_gui_snap:
-        os.system(each)
+    install_gui_packages(distro)
 
-# Distro specific
-if args.UI == "GUI":
-    for each in list_of_programs_with_gui_apt:
-        os.system(each)
-for each in list_of_programs_without_gui_apt:
-    os.system(each)
+# Install headless packages
+install_headless_packages(distro)
 
 
 # PYENV removed - using uv for Python management instead
@@ -213,10 +326,19 @@ os.system(r'$HOME/go/bin/hvm gen alias zsh >> ~/.zshrc')
 
 # NERD FONTS - Install FiraCode Nerd Font for Alacritty
 if args.UI == "GUI":
-    os.system("mkdir -p ~/.local/share/fonts")
-    os.system("wget -P ~/.local/share/fonts https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/FiraCode.zip")
-    os.system("cd ~/.local/share/fonts && unzip -o FiraCode.zip && rm FiraCode.zip")
-    os.system("fc-cache -fv")
+    if distro == 'gentoo':
+        # On Gentoo, we can use emerge or manual installation
+        os.system("sudo emerge --ask=n media-fonts/firacode")
+        # Also install nerd-fonts version manually for full support
+        os.system("mkdir -p ~/.local/share/fonts")
+        os.system("wget -P ~/.local/share/fonts https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/FiraCode.zip")
+        os.system("cd ~/.local/share/fonts && unzip -o FiraCode.zip && rm FiraCode.zip")
+        os.system("fc-cache -fv")
+    else:
+        os.system("mkdir -p ~/.local/share/fonts")
+        os.system("wget -P ~/.local/share/fonts https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/FiraCode.zip")
+        os.system("cd ~/.local/share/fonts && unzip -o FiraCode.zip && rm FiraCode.zip")
+        os.system("fc-cache -fv")
 
 print("Installation completed! Please restart your shell or run 'source ~/.zshrc' to apply changes.")
 print("Don't forget to:")
