@@ -105,7 +105,7 @@ packages_without_gui = {
     ],
     'gentoo': [
         "app-editors/neovim", "app-misc/ranger", "app-misc/neofetch", "app-misc/tmux",
-        "sys-devel/gcc", "sys-devel/clang", "dev-util/cmake", "sys-devel/gdb", "dev-python/pipx",
+        "sys-devel/gcc", "sys-devel/clang", "sys-devel/clang-runtime", "dev-util/cmake", "sys-devel/gdb", "dev-python/pipx",
         # System administration tools
         "sys-process/htop", "sys-process/btop", "sys-process/iotop", "sys-fs/ncdu", "app-text/tree",
         "sys-process/lsof", "dev-util/strace",
