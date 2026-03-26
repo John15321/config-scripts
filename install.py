@@ -351,6 +351,5 @@ print("Installation completed! Please restart your shell or run 'source ~/.zshrc
 print("Don't forget to:")
 print("- Install a specific OpenTofu version: tofuenv use latest")
 print("- Install Python versions: uv python install 3.12")
-print("- Generate HVM alias: $HOME/go/bin/hvm gen alias zsh >> ~/.zshrc")
 if args.UI == "GUI":
     print("- FiraCode Nerd Font installed for Alacritty")
