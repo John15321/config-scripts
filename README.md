@@ -5,6 +5,7 @@ Multi-distribution configuration scripts for setting up a development environmen
 
 ## Supported Distributions
 - Ubuntu/Debian (apt-get)
+- Fedora (dnf)
 - Gentoo (emerge)
 
 ## Installation
@@ -13,6 +14,12 @@ Multi-distribution configuration scripts for setting up a development environmen
 
 ```bash
 sudo apt-get update && sudo apt-get install git -y && git clone https://github.com/John15321/config-scripts.git && cd ./config-scripts && python3 ./install.py --UI no || python ./install.py --UI no
+```
+
+### Fedora One-liner:
+
+```bash
+sudo dnf update -y && sudo dnf install -y git && git clone https://github.com/John15321/config-scripts.git && cd ./config-scripts && python3 ./install.py --UI no
 ```
 
 ### Gentoo One-liner:
