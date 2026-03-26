@@ -51,6 +51,12 @@ list_of_programs_with_gui_gentoo = [
     "sudo emerge --ask=n x11-terms/alacritty",
 ]
 
+# Fedora GUI packages
+list_of_programs_with_gui_fedora = [
+    "sudo dnf install -y tilix",
+    "sudo dnf install -y alacritty",
+]
+
 # Without GUI
 list_of_programs_without_gui_apt = [
     "sudo apt-get install neovim -y",
@@ -96,6 +102,28 @@ list_of_programs_without_gui_gentoo = [
     "sudo emerge --ask=n sys-apps/smartmontools sys-block/parted sys-block/gparted sys-apps/hdparm",
 ]
 
+# Fedora headless packages
+list_of_programs_without_gui_fedora = [
+    "sudo dnf install -y neovim ranger neofetch tmux",
+    "sudo dnf install -y gcc gcc-c++",
+    "sudo dnf install -y clang clang-tools-extra",
+    "sudo dnf install -y cmake gdb pipx",
+    # System administration tools
+    "sudo dnf install -y htop btop iotop",
+    "sudo dnf install -y ncdu tree",
+    "sudo dnf install -y lsof strace",
+    "sudo dnf install -y rsync unzip zip",
+    # Network tools
+    "sudo dnf install -y curl wget",
+    "sudo dnf install -y jq gnupg2",
+    "sudo dnf install -y nmap nmap-ncat",
+    "sudo dnf install -y bind-utils iputils",
+    "sudo dnf install -y traceroute mtr",
+    "sudo dnf install -y tcpdump wireshark-cli",
+    # Disk and filesystem tools
+    "sudo dnf install -y smartmontools parted gparted hdparm",
+]
+
 list_of_programs_without_gui_cargo = [
     "cargo install eza",
     "cargo install bat",
@@ -120,6 +148,17 @@ app-arch/bzip2 sys-libs/readline dev-db/sqlite net-misc/wget net-misc/curl \
 sys-devel/llvm sys-libs/ncurses app-arch/xz-utils dev-lang/tk \
 dev-libs/libxml2 dev-libs/xmlsec dev-libs/libffi"
     )
+elif distro == 'fedora':
+    # Fedora-specific initialization
+    os.system("sudo dnf update -y")
+    os.system("sudo dnf groupinstall -y 'Development Tools'")
+    os.system("sudo dnf install -y git python3")
+    # Development libraries
+    os.system(
+        "sudo dnf install -y openssl-devel zlib-devel \
+bzip2-devel readline-devel sqlite-devel wget curl llvm \
+ncurses-devel xz-devel tk-devel libxml2-devel xmlsec1-devel libffi-devel"
+    )
 else:
     # Ubuntu/Debian initialization (original code)
     os.system("sudo apt-get update && sudo apt-get upgrade -y")
@@ -136,6 +175,8 @@ libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-d
 
 if distro == 'gentoo':
     os.system("sudo emerge --ask=n app-shells/zsh")
+elif distro == 'fedora':
+    os.system("sudo dnf install -y zsh")
 else:
     os.system("sudo apt-get install zsh -y")
 
@@ -151,6 +192,8 @@ os.system(
 # Install and configure terminal theming/powerlevel10k etc
 if distro == 'gentoo':
     os.system("sudo emerge --ask=n media-fonts/powerline-fonts")
+elif distro == 'fedora':
+    os.system("sudo dnf install -y powerline-fonts")
 else:
     os.system("sudo apt-get install fonts-powerline -y")
 
@@ -235,6 +278,10 @@ if args.UI == "GUI":
         # Install Gentoo GUI packages
         for each in list_of_programs_with_gui_gentoo:
             os.system(each)
+    elif distro == 'fedora':
+        # Install Fedora GUI packages
+        for each in list_of_programs_with_gui_fedora:
+            os.system(each)
     else:
         # Install Ubuntu/Debian GUI packages (original code)
         for each in list_of_programs_with_gui_snap:
@@ -246,6 +293,10 @@ if args.UI == "GUI":
 if distro == 'gentoo':
     # Install Gentoo headless packages
     for each in list_of_programs_without_gui_gentoo:
+        os.system(each)
+elif distro == 'fedora':
+    # Install Fedora headless packages
+    for each in list_of_programs_without_gui_fedora:
         os.system(each)
 else:
     # Ubuntu/Debian (original code)
@@ -286,6 +337,9 @@ if args.UI == "GUI":
     if distro == 'gentoo':
         # On Gentoo, also install via emerge for system-wide availability
         os.system("sudo emerge --ask=n media-fonts/firacode")
+    elif distro == 'fedora':
+        # On Fedora, install FiraCode via dnf for system-wide availability
+        os.system("sudo dnf install -y fira-code-fonts")
     
     # Install nerd-fonts version manually for full support (common for all distros)
     os.system("mkdir -p ~/.local/share/fonts")
